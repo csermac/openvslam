@@ -3,6 +3,7 @@
 #include "openvslam/camera/fisheye.h"
 #include "openvslam/camera/equirectangular.h"
 #include "openvslam/camera/radial_division.h"
+#include "openvslam/marker_model/aruco.h"
 #include "openvslam/util/string.h"
 
 #include <iostream>
@@ -59,6 +60,25 @@ config::config(const YAML::Node& yaml_node, const std::string& config_file_path)
     if (camera_->setup_type_ == camera::setup_type_t::Stereo || camera_->setup_type_ == camera::setup_type_t::RGBD) {
         if (camera_->model_type_ == camera::model_type_t::Equirectangular) {
             throw std::runtime_error("Not implemented: Stereo or RGBD of equirectangular camera model");
+        }
+    }
+
+    //========================//
+    // Load Marker Parameters //
+    //========================//
+
+    auto marker_model_yaml_node = yaml_node_["MarkerModel"];
+    if (marker_model_yaml_node) {
+        spdlog::debug("load marker model parameters");
+        auto marker_model_type = marker_model_yaml_node["type"].as<std::string>();
+        if (marker_model_type == "aruco") {
+            marker_model_ = std::make_shared<marker_model::aruco>(
+                marker_model_yaml_node["width"].as<double>(),
+                marker_model_yaml_node["marker_size"].as<double>(),
+                marker_model_yaml_node["max_markers"].as<double>());
+        }
+        else {
+            throw std::runtime_error("Invalid marker model type :" + marker_model_type);
         }
     }
 }

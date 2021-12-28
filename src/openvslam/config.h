@@ -8,6 +8,10 @@
 
 namespace openvslam {
 
+namespace marker_model {
+class base;
+}
+
 class config {
 public:
     //! Constructor
@@ -27,6 +31,9 @@ public:
 
     //! Camera model
     camera::base* camera_ = nullptr;
+
+    //! Marker model
+    std::shared_ptr<marker_model::base> marker_model_ = nullptr;
 };
 
 } // namespace openvslam
