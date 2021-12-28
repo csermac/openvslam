@@ -5,6 +5,7 @@
 #include "openvslam/camera/base.h"
 #include "openvslam/util/converter.h"
 #include "openvslam/data/bow_vocabulary.h"
+#include "openvslam/data/marker2d.h"
 
 #include <vector>
 #include <atomic>
@@ -31,6 +32,10 @@ namespace feature {
 class orb_extractor;
 } // namespace feature
 
+namespace marker_detector {
+class base;
+} // namespace marker_detector
+
 namespace data {
 
 class keyframe;
@@ -50,14 +55,15 @@ public:
      * @param img_gray
      * @param timestamp
      * @param extractor
+     * @param detector
      * @param bow_vocab
      * @param camera
      * @param depth_thr
      * @param mask
      */
     frame(const cv::Mat& img_gray, const double timestamp,
-          feature::orb_extractor* extractor, bow_vocabulary* bow_vocab,
-          camera::base* camera, const float depth_thr,
+          feature::orb_extractor* extractor, marker_detector::base* detector,
+          bow_vocabulary* bow_vocab, camera::base* camera, const float depth_thr,
           const cv::Mat& mask = cv::Mat{});
 
     /**
@@ -67,13 +73,15 @@ public:
      * @param timestamp
      * @param extractor_left
      * @param extractor_right
+     * @param detector
      * @param bow_vocab
      * @param camera
      * @param depth_thr
      * @param mask
      */
     frame(const cv::Mat& left_img_gray, const cv::Mat& right_img_gray, const double timestamp,
-          feature::orb_extractor* extractor_left, feature::orb_extractor* extractor_right, bow_vocabulary* bow_vocab,
+          feature::orb_extractor* extractor_left, feature::orb_extractor* extractor_right,
+          marker_detector::base* detector, bow_vocabulary* bow_vocab,
           camera::base* camera, const float depth_thr,
           const cv::Mat& mask = cv::Mat{});
 
@@ -83,14 +91,15 @@ public:
      * @param img_depth
      * @param timestamp
      * @param extractor
+     * @param detector
      * @param bow_vocab
      * @param camera
      * @param depth_thr
      * @param mask
      */
     frame(const cv::Mat& img_gray, const cv::Mat& img_depth, const double timestamp,
-          feature::orb_extractor* extractor, bow_vocabulary* bow_vocab,
-          camera::base* camera, const float depth_thr,
+          feature::orb_extractor* extractor, marker_detector::base* detector,
+          bow_vocabulary* bow_vocab, camera::base* camera, const float depth_thr,
           const cv::Mat& mask = cv::Mat{});
 
     /**
@@ -181,6 +190,9 @@ public:
     //! ORB extractor for stereo right image
     feature::orb_extractor* extractor_right_ = nullptr;
 
+    //! marker detector
+    marker_detector::base* marker_detector_ = nullptr;
+
     //! timestamp
     double timestamp_;
 
@@ -226,6 +238,9 @@ public:
 
     //! landmarks, whose nullptr indicates no-association
     std::vector<std::shared_ptr<landmark>> landmarks_;
+
+    //! markers 2D (ID to marker2d map)
+    std::unordered_map<unsigned int, marker2d> markers_2d_;
 
     //! outlier flags, which are mainly used in pose optimization and bundle adjustment
     std::vector<bool> outlier_flags_;
