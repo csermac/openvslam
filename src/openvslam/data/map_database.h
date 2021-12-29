@@ -22,6 +22,7 @@ namespace data {
 class frame;
 class keyframe;
 class landmark;
+class marker;
 class camera_database;
 class bow_database;
 
@@ -60,6 +61,18 @@ public:
      * @param lm
      */
     void erase_landmark(unsigned int id);
+
+    /**
+     * Add marker to the database
+     * @param mkr
+     */
+    void add_marker(const std::shared_ptr<marker>& mkr);
+
+    /**
+     * Erase marker from the database
+     * @param mkr
+     */
+    void erase_marker(const std::shared_ptr<marker>& mkr);
 
     /**
      * Set local landmarks
@@ -120,6 +133,24 @@ public:
      * @return
      */
     unsigned int get_num_landmarks() const;
+
+    /**
+     * Get all of the markers in the database
+     * @return
+     */
+    std::vector<std::shared_ptr<marker>> get_all_markers() const;
+
+    /**
+     * Get the number of markers
+     * @return
+     */
+    unsigned int get_num_markers() const;
+
+    /**
+     * Get marker
+     * @return marker
+     */
+    std::shared_ptr<marker> get_marker(unsigned int id) const;
 
     /**
      * Get the maximum keyframe ID
@@ -233,6 +264,8 @@ private:
     std::unordered_map<unsigned int, std::shared_ptr<keyframe>> keyframes_;
     //! IDs and landmarks
     std::unordered_map<unsigned int, std::shared_ptr<landmark>> landmarks_;
+    //! IDs and markers
+    std::unordered_map<unsigned int, std::shared_ptr<marker>> markers_;
 
     //! local landmarks
     std::vector<std::shared_ptr<landmark>> local_landmarks_;

@@ -1,7 +1,9 @@
 #include "openvslam/mapping_module.h"
 #include "openvslam/data/landmark.h"
+#include "openvslam/data/marker.h"
 #include "openvslam/data/bow_database.h"
 #include "openvslam/data/map_database.h"
+#include "openvslam/marker_model/base.h"
 #include "openvslam/module/keyframe_inserter.h"
 
 namespace openvslam {
@@ -89,6 +91,21 @@ std::shared_ptr<data::keyframe> keyframe_inserter::insert_new_keyframe(data::fra
 
     curr_frm.update_pose_params();
     auto keyfrm = data::keyframe::make_keyframe(curr_frm, map_db_, bow_db_);
+
+    for (const auto& id_mkr2d : keyfrm->markers_2d_) {
+        auto marker = map_db_->get_marker(id_mkr2d.first);
+        if (!marker) {
+            // Create new marker
+            auto mkr2d = id_mkr2d.second;
+            eigen_alloc_vector<Vec3_t> corners_pos_w = mkr2d.compute_corners_pos_w(keyfrm->get_cam_pose_inv(), mkr2d.marker_model_->corners_pos_);
+            marker = std::make_shared<data::marker>(corners_pos_w, id_mkr2d.first, mkr2d.marker_model_);
+            // add the marker to the map DB
+            map_db_->add_marker(marker);
+        }
+        // Set the association to the new marker
+        keyfrm->add_marker(marker);
+        marker->observations_.push_back(keyfrm);
+    }
 
     frm_id_of_last_keyfrm_ = curr_frm.id_;
 

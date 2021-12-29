@@ -5,6 +5,7 @@
 #include "openvslam/camera/base.h"
 #include "openvslam/data/graph_node.h"
 #include "openvslam/data/bow_vocabulary.h"
+#include "openvslam/data/marker2d.h"
 
 #include <set>
 #include <mutex>
@@ -32,6 +33,8 @@ namespace data {
 
 class frame;
 class landmark;
+class marker;
+class marker2d;
 class map_database;
 class bow_database;
 
@@ -188,6 +191,17 @@ public:
      */
     bool depth_is_avaliable() const;
 
+    /**
+     * Add a marker
+     */
+    void add_marker(const std::shared_ptr<marker>& mkr);
+
+    /**
+     * Get all of the markers
+     * (NOTE: including nullptr)
+     */
+    std::vector<std::shared_ptr<marker>> get_markers() const;
+
     //-----------------------------------------
     // flags
 
@@ -273,6 +287,9 @@ public:
     //! descriptors
     const cv::Mat descriptors_;
 
+    //! observed markers 2D (ID to marker2d map)
+    std::unordered_map<unsigned int, marker2d> markers_2d_;
+
     //! BoW features (DBoW2 or FBoW)
 #ifdef USE_DBOW2
     DBoW2::BowVector bow_vec_;
@@ -320,10 +337,16 @@ private:
     //-----------------------------------------
     // observations
 
-    //! need mutex for access to observations
+    //! need mutex for access to landmark observations
     mutable std::mutex mtx_observations_;
     //! observed landmarks
     std::vector<std::shared_ptr<landmark>> landmarks_;
+
+    //-----------------------------------------
+    // marker observations
+
+    //! observed markers
+    std::unordered_map<unsigned int, std::shared_ptr<marker>> markers_;
 
     //-----------------------------------------
     // databases

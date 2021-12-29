@@ -6,6 +6,7 @@
 #include "openvslam/data/frame.h"
 #include "openvslam/data/keyframe.h"
 #include "openvslam/data/landmark.h"
+#include "openvslam/data/marker.h"
 #include "openvslam/data/map_database.h"
 #include "openvslam/data/bow_database.h"
 #include "openvslam/feature/orb_params.h"
@@ -27,6 +28,7 @@ keyframe::keyframe(const frame& frm, map_database* map_db, bow_database* bow_db)
       num_keypts_(frm.num_keypts_), keypts_(frm.keypts_), undist_keypts_(frm.undist_keypts_), bearings_(frm.bearings_),
       keypt_indices_in_cells_(frm.keypt_indices_in_cells_),
       stereo_x_right_(frm.stereo_x_right_), depths_(frm.depths_), descriptors_(frm.descriptors_.clone()),
+      markers_2d_(frm.markers_2d_),
       // BoW
       bow_vec_(frm.bow_vec_), bow_feat_vec_(frm.bow_feat_vec_),
       // ORB scale pyramid
@@ -400,6 +402,21 @@ float keyframe::compute_median_depth(const bool abs) const {
 
 bool keyframe::depth_is_avaliable() const {
     return camera_->setup_type_ != camera::setup_type_t::Monocular;
+}
+
+void keyframe::add_marker(const std::shared_ptr<marker>& mkr) {
+    std::lock_guard<std::mutex> lock(mtx_observations_);
+    markers_[mkr->id_] = mkr;
+}
+
+std::vector<std::shared_ptr<marker>> keyframe::get_markers() const {
+    std::lock_guard<std::mutex> lock(mtx_observations_);
+    std::vector<std::shared_ptr<marker>> markers;
+    markers.reserve(markers_.size());
+    for (const auto id_marker : markers_) {
+        markers.push_back(id_marker.second);
+    }
+    return markers;
 }
 
 void keyframe::set_not_to_be_erased() {
