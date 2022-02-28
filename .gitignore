@@ -45,3 +45,7 @@ cmake-build-release/
 
 # vcpkg
 /3rd/vcpkg/
+
+# clangd files
+*.clangd/
+compile_commnads.json
