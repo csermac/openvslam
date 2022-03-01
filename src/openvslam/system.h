@@ -3,6 +3,7 @@
 
 #include "openvslam/type.h"
 #include "openvslam/data/bow_vocabulary_fwd.h"
+#include "openvslam/tracking_module.h"
 
 #include <string>
 #include <thread>
@@ -16,7 +17,7 @@
 namespace openvslam {
 
 class config;
-class tracking_module;
+// class tracking_module;
 class mapping_module;
 class global_optimization_module;
 
@@ -152,6 +153,8 @@ public:
 
     //!! Termination of the system is requested or not
     bool terminate_is_requested() const;
+		
+    tracking_module* get_tracker() const{ return tracker_;}
 
 private:
     //! Check reset request of the system

@@ -1,6 +1,6 @@
+#include "openvslam/tracking_module.h"
 #include "openvslam/system.h"
 #include "openvslam/config.h"
-#include "openvslam/tracking_module.h"
 #include "openvslam/mapping_module.h"
 #include "openvslam/global_optimization_module.h"
 #include "openvslam/camera/base.h"
